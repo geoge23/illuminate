@@ -8,6 +8,7 @@ import openai from './utils/openai.js';
 import client, { getPgType } from './utils/postgres.js';
 import prepareTable from './utils/prepareTable.js';
 import generateStructuredMessage from './utils/structuredMessage.js';
+import cors from 'cors';
 
 config();
 
@@ -21,6 +22,8 @@ app.use(session({
 }))
 app.use(bodyParser.raw({ type: 'text/csv' }));
 app.use(bodyParser.json());
+
+app.use(cors())
 
 app.get('/', (req, res) => {
     res.send('Hello World');
@@ -84,7 +87,14 @@ app.get('/table/:id', async (req, res) => {
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 100;
 
-    const q = await client.query(`SELECT * FROM ${pg.escapeIdentifier(table)} OFFSET ${offset} LIMIT ${limit};`);
+    try {
+        var q = await client.query(`SELECT * FROM ${pg.escapeIdentifier(table)} OFFSET ${offset} LIMIT ${limit};`);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).send({
+            error: e.message,
+        });
+    }
 
     const rows = q.rows;
     const fields = await client.query(`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ${pg.escapeLiteral(table)};`);
@@ -148,7 +158,6 @@ app.post('/table/:id/query', async (req, res) => {
 
 
     res.send({
-        response: response?.rows || [],
         table: prepareTable(response?.rows || []),
         iterations: i,
         gptQuery

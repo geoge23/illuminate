@@ -7,7 +7,10 @@ export default function prepareTable(rows) {
     if (!row) {
         return {
             type: "statistic",
-            data: "No data available"
+            data: {
+                label: "Query failed",
+                value: "No Data Available"
+            }
         }
     }
 
@@ -31,7 +34,10 @@ export default function prepareTable(rows) {
             } else {
                 return {
                     type: "statistic",
-                    data: row[titleOfRow]
+                    data: {
+                        label: titleOfRow,
+                        value: row[titleOfRow]
+                    }
                 }
             }
         }
