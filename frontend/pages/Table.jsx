@@ -56,12 +56,11 @@ export default function TablePage() {
     }
 
     async function loadMore() {
-        fetch(`${baseUrl}/table/${id}`, {
-            method: 'POST',
+        fetch(`${baseUrl}/table/${id}?offset=${response.rows.length}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ offset: response.rows.length }),
         })
             .then(response => response.json())
             .then(json => {
@@ -71,61 +70,62 @@ export default function TablePage() {
                 });
             })
     }
-}
 
-function removeStackAtIndex(index) {
-    setStack([...stack.slice(0, index), ...stack.slice(index + 1)]);
-}
 
-return (
-    <Box h="100vh" w="full" p={5}>
-        <SpotlightOverlay disclosure={spotlightDisclosure} makeQuery={makeQuery} />
-        <TableSlideover disclosure={sidebarDisclosure} stack={stack} removeStackAtIndex={removeStackAtIndex} />
-        <Flex justifyContent={"space-between"} mb={4}>
-            <Flex alignItems="center">
-                <Image src={Logo} alt="logo" aspectRatio="1x1" h={16} cursor={"pointer"} onClick={() => navigate("/")} />
-                <Flex flexDir="column" ml="3">
-                    <Text fontSize="lg" fontWeight="light" mb={-3} textTransform={"uppercase"}>Now viewing</Text>
-                    <Text fontSize="4xl" fontWeight="bold" mb={-2}>Example Data Set</Text>
+    function removeStackAtIndex(index) {
+        setStack([...stack.slice(0, index), ...stack.slice(index + 1)]);
+    }
+
+    return (
+        <Box h="100vh" w="full" p={5}>
+            <SpotlightOverlay disclosure={spotlightDisclosure} makeQuery={makeQuery} />
+            <TableSlideover disclosure={sidebarDisclosure} stack={stack} removeStackAtIndex={removeStackAtIndex} />
+            <Flex justifyContent={"space-between"} mb={4}>
+                <Flex alignItems="center">
+                    <Image src={Logo} alt="logo" aspectRatio="1x1" h={16} cursor={"pointer"} onClick={() => navigate("/")} />
+                    <Flex flexDir="column" ml="3">
+                        <Text fontSize="lg" fontWeight="light" mb={-3} textTransform={"uppercase"}>Now viewing</Text>
+                        <Text fontSize="4xl" fontWeight="bold" mb={-2}>Example Data Set</Text>
+                    </Flex>
+                </Flex>
+                <Flex>
+                    {stack.length > 0 && <Button mr={4} colorScheme="gray" size="lg" textTransform={"uppercase"} leftIcon={<InfoIcon />} onClick={() => sidebarDisclosure.onOpen()}>See conversation</Button>}
+                    <Button colorScheme="blue" size="lg" textTransform={"uppercase"} leftIcon={<ChatIcon />} onClick={() => spotlightDisclosure.onOpen()}>Ask a question</Button>
                 </Flex>
             </Flex>
-            <Flex>
-                {stack.length > 0 && <Button mr={4} colorScheme="gray" size="lg" textTransform={"uppercase"} leftIcon={<InfoIcon />} onClick={() => sidebarDisclosure.onOpen()}>See conversation</Button>}
-                <Button colorScheme="blue" size="lg" textTransform={"uppercase"} leftIcon={<ChatIcon />} onClick={() => spotlightDisclosure.onOpen()}>Ask a question</Button>
-            </Flex>
-        </Flex>
-        <table style={{
-            width: "100%",
-            borderCollapse: "collapse",
-        }}>
-            <thead>
-                <tr style={{
-                    marginBottom: "10px",
-                }}>
-                    {response?.fields.map((field, i) => (
-                        <th key={i} style={{
-                            marginRight: "10px",
-                            backgroundColor: "#f5f5f5",
-                            padding: "10px",
-                            textAlign: "left",
-                        }}>{kebabCaseToTitleCase(field.column_name)}</th>
-                    ))}
-                </tr>
-            </thead>
-            <tbody>
-                {response?.rows.map((row, i) => (
-                    <tr key={i}>
-                        {response.fields.map((field, j) => (
-                            <td key={j} style={{
-                                borderTop: "1px solid #ccc",
-                                borderBottom: "1px solid #ccc",
+            <table style={{
+                width: "100%",
+                borderCollapse: "collapse",
+            }}>
+                <thead>
+                    <tr style={{
+                        marginBottom: "10px",
+                    }}>
+                        {response?.fields.map((field, i) => (
+                            <th key={i} style={{
+                                marginRight: "10px",
+                                backgroundColor: "#f5f5f5",
                                 padding: "10px",
-                            }}>{formatValue(row[field.column_name])}</td>
+                                textAlign: "left",
+                            }}>{kebabCaseToTitleCase(field.column_name)}</th>
                         ))}
                     </tr>
-                ))}
-            </tbody>
-        </table>
-    </Box>
-);
+                </thead>
+                <tbody>
+                    {response?.rows.map((row, i) => (
+                        <tr key={i}>
+                            {response.fields.map((field, j) => (
+                                <td key={j} style={{
+                                    borderTop: "1px solid #ccc",
+                                    borderBottom: "1px solid #ccc",
+                                    padding: "10px",
+                                }}>{formatValue(row[field.column_name])}</td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <Button mt={5} colorScheme="blue" size="lg" textTransform={"uppercase"} onClick={loadMore}>Load More</Button>
+        </Box>
+    );
 }
