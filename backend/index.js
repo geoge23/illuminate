@@ -6,6 +6,7 @@ import session from 'express-session';
 import pg from 'pg';
 import openai from './utils/openai.js';
 import client, { getPgType } from './utils/postgres.js';
+import prepareTable from './utils/prepareTable.js';
 import generateStructuredMessage from './utils/structuredMessage.js';
 
 config();
@@ -148,6 +149,7 @@ app.post('/table/:id/query', async (req, res) => {
 
     res.send({
         response: response?.rows || [],
+        table: prepareTable(response?.rows || []),
         iterations: i,
         gptQuery
     });
