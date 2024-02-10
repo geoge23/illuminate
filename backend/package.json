@@ -16,9 +16,11 @@
     "express": "^4.18.2",
     "express-busboy": "^10.1.0",
     "express-session": "^1.18.0",
+    "openai": "^4.27.0",
     "pg": "^8.11.3"
   },
   "devDependencies": {
+    "eslint": "^8.56.0",
     "nodemon": "^3.0.3"
   }
 }

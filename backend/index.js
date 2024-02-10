@@ -4,7 +4,9 @@ import { config } from 'dotenv';
 import express from 'express';
 import session from 'express-session';
 import pg from 'pg';
-import client from './utils/postgres.js';
+import openai from './utils/openai.js';
+import client, { jsToPgType } from './utils/postgres.js';
+import generateStructuredMessage from './utils/structuredMessage.js';
 
 config();
 
@@ -31,13 +33,6 @@ app.post('/login', (res, req) => {
     }
 })
 
-const jsToPgType = {
-    string: 'text',
-    number: 'int',
-    boolean: 'bool',
-    object: 'jsonb',
-}
-
 app.post('/table/upload', async (req, res) => {
     // takes a plaintext csv
     // returns a table id
@@ -52,21 +47,22 @@ app.post('/table/upload', async (req, res) => {
     });
 
     const cols = Object.keys(data[0]).filter(col => col !== "id");
+    const escapeCol = (col) => pg.escapeIdentifier(col.toLowerCase());
     const schema = cols.map((col) => {
-        const type = typeof data[0][col];
-        return `${pg.escapeIdentifier(col)} ${jsToPgType[type]}`;
+        const type = typeof data[0][col]; //TODO: potential for the first row to not have all the columns defined
+        return `${escapeCol(col)} ${jsToPgType[type]}`;
     })
     schema.push('id SERIAL PRIMARY KEY');
     const schemaText = schema.join(', ');
 
     const tableName = `table_${Math.random().toString(36).substring(7)}`; //TODO: make this better
     const escapedTableName = pg.escapeIdentifier(tableName);
-    const q = await client.query(`CREATE TABLE ${escapedTableName} (${schemaText})`); //TODO: this can def inject sql
+    await client.query(`CREATE TABLE ${escapedTableName} (${schemaText})`); //TODO: this can def inject sql
 
     for (const row of data) {
         try {
-            const statement = `INSERT INTO ${escapedTableName} (${cols.map(e => pg.escapeIdentifier(e)).join(', ')}) VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`;
-            const q = await client.query(statement, cols.map((col) => row[col]));
+            const statement = `INSERT INTO ${escapedTableName} (${cols.map(escapeCol).join(', ')}) VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`;
+            await client.query(statement, cols.map((col) => row[col]));
         } catch (e) {
             console.error(e);
         }
@@ -94,6 +90,23 @@ app.get('/table/:id', async (req, res) => {
             offset,
             limit,
         },
+        test: {
+            among: await generateStructuredMessage(table, "What is the average age of the users?")
+        }
+    });
+})
+
+app.post('/table/:id/query', async (req, res) => {
+    const { query } = req.body;
+    const table = req.params.id;
+
+    const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: await generateStructuredMessage(table, query),
+    });
+
+    res.send({
+        completion,
     });
 })
 
