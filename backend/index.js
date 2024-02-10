@@ -62,7 +62,7 @@ app.post('/table/upload', async (req, res) => {
     for (const row of data) {
         try {
             const statement = `INSERT INTO ${escapedTableName} (${cols.map(escapeCol).join(', ')}) VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`;
-            await client.query(statement, cols.map((col) => row[col]));
+            await client.query(statement, cols.map((col) => row[col] || null));
         } catch (e) {
             console.error(e);
         }
@@ -89,9 +89,6 @@ app.get('/table/:id', async (req, res) => {
         pagination: {
             offset,
             limit,
-        },
-        test: {
-            among: await generateStructuredMessage(table, "What is the average age of the users?")
         }
     });
 })
@@ -100,13 +97,52 @@ app.post('/table/:id/query', async (req, res) => {
     const { query } = req.body;
     const table = req.params.id;
 
-    const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: await generateStructuredMessage(table, query),
-    });
+    let watchDog = true;
+    const MAX_ITERATIONS = 3;
+    let i = 0;
+    let response, gptQuery;
+
+    do {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: await generateStructuredMessage(table, query),
+        });
+
+        const sqlQuery = completion.choices[0].message.content;
+        gptQuery = sqlQuery;
+
+        //validate the query to ensure nothing malicious
+        let validated = true;
+        //is there more than one semi-colon?
+        if (sqlQuery.split(';').length > 2) {
+            validated = false;
+        }
+        //is there only one FROM statement with the correct table name?
+        if (sqlQuery.split('FROM').length !== 2 || !sqlQuery.includes(table)) {
+            validated = false;
+        }
+
+        //does this query add or remove data?
+        if (sqlQuery.includes('INSERT') || sqlQuery.includes('UPDATE') || sqlQuery.includes('DELETE')) {
+            validated = false;
+        }
+
+        if (validated) {
+            try {
+                response = await client.query(sqlQuery);
+                watchDog = false;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        i++;
+    } while (watchDog && i < MAX_ITERATIONS)
+
 
     res.send({
-        completion,
+        response: response?.rows || [],
+        iterations: i,
+        gptQuery
     });
 })
 

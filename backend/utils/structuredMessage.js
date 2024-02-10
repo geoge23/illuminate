@@ -6,9 +6,9 @@ export default async function generateStructuredMessage(table, query) {
     return [
         {
             role: "system",
-            content: `You are a data analyst that will be coding raw SQL requests to query provided data information. ` +
-                `I am providing you with data-relevant information below. Write me a SQL Request based off of the following question about the data ` +
-                `(provided below). In your output, strictly provide the SQL code and no other text. Again, ONLY provide the SQL code.`
+            content: `You are a data analyst that will be coding raw Postgres SQL requests to query provided data information. ` +
+                `I am providing you with data-relevant information below. Write me a Postgres SQL Request based off of the following question about the data ` +
+                `(provided below). In your output, strictly provide the Postgres SQL code and no other text. Again, ONLY provide the Postgres SQL code.`
         },
         {
             role: "user",
