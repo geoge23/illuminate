@@ -3,6 +3,7 @@ import { parse } from 'csv-parse/sync';
 import { config } from 'dotenv';
 import express from 'express';
 import session from 'express-session';
+import pg from 'pg';
 import client from './utils/postgres.js';
 
 config();
@@ -16,6 +17,7 @@ app.use(session({
     cookie: { secure: true }
 }))
 app.use(bodyParser.raw({ type: 'text/csv' }));
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
     res.send('Hello World');
@@ -36,7 +38,7 @@ const jsToPgType = {
     object: 'jsonb',
 }
 
-app.post('/uploadTable', async (req, res) => {
+app.post('/table/upload', async (req, res) => {
     // takes a plaintext csv
     // returns a table id
 
@@ -49,26 +51,50 @@ app.post('/uploadTable', async (req, res) => {
         cast: true,
     });
 
-    const cols = Object.keys(data[0]);
+    const cols = Object.keys(data[0]).filter(col => col !== "id");
     const schema = cols.map((col) => {
         const type = typeof data[0][col];
-        return `${col} ${jsToPgType[type]}`;
-    }).join(', ');
+        return `${pg.escapeIdentifier(col)} ${jsToPgType[type]}`;
+    })
+    schema.push('id SERIAL PRIMARY KEY');
+    const schemaText = schema.join(', ');
 
     const tableName = `table_${Math.random().toString(36).substring(7)}`; //TODO: make this better
-    const q = await client.query(`CREATE TABLE ${tableName} (${schema})`);
+    const escapedTableName = pg.escapeIdentifier(tableName);
+    const q = await client.query(`CREATE TABLE ${escapedTableName} (${schemaText})`); //TODO: this can def inject sql
 
     for (const row of data) {
-        const statement = `INSERT INTO ${tableName} (${cols.join(', ')}) VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`;
-        const q = await client.query(statement, cols.map((col) => row[col]));
-        console.log(q);
+        try {
+            const statement = `INSERT INTO ${escapedTableName} (${cols.map(e => pg.escapeIdentifier(e)).join(', ')}) VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`;
+            const q = await client.query(statement, cols.map((col) => row[col]));
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    res.send(tableName);
+    res.send({
+        table: tableName,
+    });
 })
 
-app.post('/chooseTable', (req, res) => {
+app.get('/table/:id', async (req, res) => {
+    const table = req.params.id;
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 100;
 
+    const q = await client.query(`SELECT * FROM ${pg.escapeIdentifier(table)} OFFSET ${offset} LIMIT ${limit};`);
+
+    const rows = q.rows;
+    const fields = await client.query(`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ${pg.escapeLiteral(table)};`);
+
+    res.send({
+        rows,
+        fields: fields.rows,
+        pagination: {
+            offset,
+            limit,
+        },
+    });
 })
 
 app.listen(process.env.PORT || 3000, () => {
