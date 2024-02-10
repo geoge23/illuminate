@@ -125,7 +125,7 @@ app.post('/table/:id/query', async (req, res) => {
             validated = false;
         }
         //is there only one FROM statement with the correct table name?
-        if (sqlQuery.split('FROM').length !== 2 || !sqlQuery.includes(table)) {
+        if (!sqlQuery.includes(table)) {
             validated = false;
         }
 
