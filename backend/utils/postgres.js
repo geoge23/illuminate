@@ -54,9 +54,21 @@ export async function guessEnums(tableName) {
     return columnSchemas;
 }
 
-export const jsToPgType = {
+const jsToPgType = {
     string: 'text',
     number: 'int',
     boolean: 'bool',
     object: 'jsonb',
+}
+
+export function getPgType(val) {
+    // check if is null, default to text
+    if (val === null || val === undefined) {
+        return 'text';
+    }
+    // check if is a date
+    if (val instanceof Date) {
+        return 'timestamp';
+    }
+    return jsToPgType[typeof val];
 }

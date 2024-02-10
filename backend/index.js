@@ -5,7 +5,7 @@ import express from 'express';
 import session from 'express-session';
 import pg from 'pg';
 import openai from './utils/openai.js';
-import client, { jsToPgType } from './utils/postgres.js';
+import client, { getPgType } from './utils/postgres.js';
 import generateStructuredMessage from './utils/structuredMessage.js';
 
 config();
@@ -33,6 +33,7 @@ app.post('/login', (res, req) => {
     }
 })
 
+
 app.post('/table/upload', async (req, res) => {
     // takes a plaintext csv
     // returns a table id
@@ -44,13 +45,13 @@ app.post('/table/upload', async (req, res) => {
     const data = parse(req.body, {
         columns: true,
         cast: true,
+        castDate: true,
     });
 
     const cols = Object.keys(data[0]).filter(col => col !== "id");
     const escapeCol = (col) => pg.escapeIdentifier(col.toLowerCase());
     const schema = cols.map((col) => {
-        const type = typeof data[0][col]; //TODO: potential for the first row to not have all the columns defined
-        return `${escapeCol(col)} ${jsToPgType[type]}`;
+        return `${escapeCol(col)} ${getPgType(data.find(row => valueOrBlank(row[col]) !== null)?.[col])}`;
     })
     schema.push('id SERIAL PRIMARY KEY');
     const schemaText = schema.join(', ');
@@ -62,7 +63,7 @@ app.post('/table/upload', async (req, res) => {
     for (const row of data) {
         try {
             const statement = `INSERT INTO ${escapedTableName} (${cols.map(escapeCol).join(', ')}) VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')})`;
-            await client.query(statement, cols.map((col) => row[col] || null));
+            await client.query(statement, cols.map((col) => valueOrBlank(row[col])));
         } catch (e) {
             console.error(e);
         }
@@ -72,6 +73,10 @@ app.post('/table/upload', async (req, res) => {
         table: tableName,
     });
 })
+
+function valueOrBlank(val) {
+    return val === null || val === undefined || val === "" ? null : val;
+}
 
 app.get('/table/:id', async (req, res) => {
     const table = req.params.id;
@@ -106,6 +111,8 @@ app.post('/table/:id/query', async (req, res) => {
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: await generateStructuredMessage(table, query),
+            temperature: 0.2,
+            top_p: 0.1,
         });
 
         const sqlQuery = completion.choices[0].message.content;
