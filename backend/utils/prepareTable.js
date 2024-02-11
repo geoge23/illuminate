@@ -32,7 +32,7 @@ export default function prepareTable(rows) {
                     ]
                 }
             } else {
-                if (Object.keys(row[titleOfRow]) == 0) {
+                if (typeof row[titleOfRow] === "string" || Object.keys(row[titleOfRow]) == 0) {
                     return {
                         type: "statistic",
                         data: {
