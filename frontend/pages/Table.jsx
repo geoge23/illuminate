@@ -1,5 +1,5 @@
 import { ChatIcon, InfoIcon } from "@chakra-ui/icons";
-import { Box, Button, Flex, IconButton, Image, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Flex, Image, Text, useDisclosure } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SpotlightOverlay from "../components/SpotlightOverlay";
@@ -7,6 +7,7 @@ import TableSlideover from "../components/TableSlideover";
 import { baseUrl } from '../config';
 import Logo from '../logo.png';
 import formatValue, { kebabCaseToTitleCase } from "../formatValue.jsx";
+import Loader from "../components/Loader.jsx";
 
 export default function TablePage() {
     const sidebarDisclosure = useDisclosure();
@@ -15,11 +16,14 @@ export default function TablePage() {
     const [stack, setStack] = useState([]);
     const navigate = useNavigate();
     const { id } = useParams();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true)
         fetch(`${baseUrl}/table/${id}`)
             .then(response => response.json())
             .then(json => {
+                setLoading(false)
                 setResponse({
                     fields: json.fields.sort((a, b) => {
                         //always put id first
@@ -33,12 +37,15 @@ export default function TablePage() {
             })
             .catch(e => {
                 //TODO: handle case where table doesnt exist
+                setLoading(false)
+                alert(e.message)
                 console.log(e);
 
             })
     }, [])
 
     async function makeQuery(query) {
+        setLoading(true)
         const queryRes = await fetch(`${baseUrl}/table/${id}/query`, {
             method: 'POST',
             headers: {
@@ -48,6 +55,7 @@ export default function TablePage() {
         })
 
         const json = await queryRes.json();
+        setLoading(false)
         setStack([...stack, {
             type: "query",
             data: query,
@@ -56,6 +64,7 @@ export default function TablePage() {
     }
 
     async function loadMore() {
+        setLoading(true)
         fetch(`${baseUrl}/table/${id}?offset=${response.rows.length}`, {
             method: 'GET',
             headers: {
@@ -64,8 +73,9 @@ export default function TablePage() {
         })
             .then(response => response.json())
             .then(json => {
+                setLoading(false)
                 setResponse({
-                    fields: json.fields,
+                    ...response,
                     rows: [...response.rows, ...json.rows],
                 });
             })
@@ -78,14 +88,15 @@ export default function TablePage() {
 
     return (
         <Box h="100vh" w="full" p={5}>
+            {loading && <Loader />}
             <SpotlightOverlay disclosure={spotlightDisclosure} makeQuery={makeQuery} />
             <TableSlideover disclosure={sidebarDisclosure} stack={stack} removeStackAtIndex={removeStackAtIndex} />
             <Flex justifyContent={"space-between"} mb={4}>
                 <Flex alignItems="center">
                     <Image src={Logo} alt="logo" aspectRatio="1x1" h={16} cursor={"pointer"} onClick={() => navigate("/")} />
                     <Flex flexDir="column" ml="3">
-                        <Text fontSize="lg" fontWeight="light" mb={-3} textTransform={"uppercase"}>Now viewing</Text>
-                        <Text fontSize="4xl" fontWeight="bold" mb={-2}>Example Data Set</Text>
+                        <Text fontSize="4xl" fontWeight="bold" color="blue.500" mb={-1} mt={-2} textTransform={"uppercase"}>Illuminate</Text>
+                        <Text fontSize="sm" fontWeight="thin" mt={-2}>Now viewing your dataset</Text>
                     </Flex>
                 </Flex>
                 <Flex>

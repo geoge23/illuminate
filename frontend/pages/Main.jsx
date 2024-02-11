@@ -1,13 +1,18 @@
 import { PlusSquareIcon } from '@chakra-ui/icons';
 import { Button, Flex, Image, Text } from "@chakra-ui/react";
-import { Link, useHref, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../logo.png';
 import { baseUrl } from '../config';
+import Loader from '../components/Loader';
+import { useState } from 'react';
 
 export default function Main() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     return (
         <Flex w="full" h="100vh" alignItems="center" justifyContent="center" flexDir="column">
+            {loading && <Loader />}
             <Flex alignItems="center">
                 <Image src={Logo} alt="logo" aspectRatio="1x1" h="100px" />
                 <Flex flexDir="column" ml="7">
@@ -20,6 +25,7 @@ export default function Main() {
                 const file = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = async (e) => {
+                    setLoading(true);
                     const res = await fetch(`${baseUrl}/table/upload`, {
                         method: 'POST',
                         headers: {

@@ -25,18 +25,7 @@ app.use(bodyParser.json());
 
 app.use(cors())
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
-
-app.post('/login', (res, req) => {
-    //TODO: implement login logic
-
-    req.session.user = {
-        username: "example-user"
-    }
-})
-
+app.use(express.static('public'));
 
 app.post('/table/upload', async (req, res) => {
     // takes a plaintext csv

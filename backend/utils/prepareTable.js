@@ -44,7 +44,7 @@ export default function prepareTable(rows) {
 
     } else {
         const numberOfColumns = Object.keys(row).length;
-        if (numberOfColumns === 2) {
+        if (numberOfColumns === 2 && rows.length < 25) {
             const [numKey] = Object.entries(row).find(([_, val]) => isNumberInString(val))
             const [stringKey] = Object.entries(row).find(([_, val]) => typeof val === 'string')
             if (numKey && stringKey) {

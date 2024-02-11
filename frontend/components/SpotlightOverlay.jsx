@@ -20,11 +20,17 @@ export default function SpotlightOverlay({ disclosure, makeQuery }) {
 
     async function submitQuery() {
         await makeQuery(ref.current.value);
+        ref.current.value = "";
         onClose();
     }
 
-    return isOpen && <Portal>
-        <Flex w="full" h="full" position="fixed" top={0} left={0} bg="rgba(0,0,0,0.7)" zIndex={100} justifyContent={"center"} alignItems={"center"} flexDir={"column"}>
+    return <Portal >
+        <Flex onClick={(e) => {
+            //if they click outside the subelement, close the overlay
+            if (e.target === e.currentTarget) {
+                onClose();
+            }
+        }} visibility={isOpen ? "visible" : "hidden"} w="full" h="full" position="fixed" top={0} left={0} opacity={isOpen ? "100%" : "0%"} transition={"all ease 0.2s"} bg="rgba(0,0,0,0.7)" zIndex={101} justifyContent={"center"} alignItems={"center"} flexDir={"column"}>
             <Box>
                 <Flex w="750px" bg={"transparent"} borderRadius={10} alignItems={"center"}>
                     <Input ref={ref} bg={"white"} placeholder="Ask any question you'd like..." border={0} w={"full"} py={10} fontSize={"2xl"} />

@@ -10,3 +10,12 @@ services:
       - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+  app:
+    image: ghcr.io/geoge23/illuminate:latest 
+    environment: 
+      OPENAI_API_KEY: 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
+      PGDATABASE: mydb
+      PGUSER: myuser
+      PGPASSWORD: mypassword
+      PGHOST: database
+    restart: on-failure

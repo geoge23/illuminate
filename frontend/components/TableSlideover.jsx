@@ -1,91 +1,16 @@
 /* eslint-disable react/prop-types */
 import { Chart as ChartJS } from 'chart.js';
-import { Box, Card, CardBody, CardFooter, CardHeader, Stat, StatLabel, StatNumber, Text } from "@chakra-ui/react";
+import { Box, Card, CardBody, Stat, StatLabel, StatNumber, Text } from "@chakra-ui/react";
 import { Bar, Pie } from "react-chartjs-2";
 import 'chart.js/auto';
 import formatValue, { kebabCaseToTitleCase } from "../formatValue";
 
-const table = [
-    {
-        "id": 1,
-        "diagnosis": "kidney disease",
-        "er_exit_date": "2024-01-21T05:00:00.000Z"
-    },
-    {
-        "id": 2,
-        "diagnosis": "type 1 diabetes",
-        "er_exit_date": "2024-01-15T05:00:00.000Z"
-    },
-    {
-        "id": 3,
-        "diagnosis": "heart disease",
-        "er_exit_date": "2024-01-26T05:00:00.000Z"
-    },
-    {
-        "id": 4,
-        "diagnosis": "heart disease",
-        "er_exit_date": "2024-01-28T05:00:00.000Z"
-    },
-    {
-        "id": 5,
-        "diagnosis": "trauma",
-        "er_exit_date": "2024-01-08T05:00:00.000Z"
-    }];
-
-const bar = JSON.parse(`{
-    "type": "barchart",
-    "data": [
-        {
-            "label": "covid",
-            "value": "37"
-        },
-        {
-            "label": "flu",
-            "value": "26"
-        },
-        {
-            "label": "heart disease",
-            "value": "46"
-        },
-        {
-            "label": "kidney disease",
-            "value": "34"
-        },
-        {
-            "label": "trauma",
-            "value": "31"
-        },
-        {
-            "label": "type 1 diabetes",
-            "value": "42"
-        },
-        {
-            "label": "type 2 diabetes",
-            "value": "26"
-        }
-    ]
-}`)
-
-const pie = JSON.parse(`{
-    "type": "piechart",
-    "data": [
-        {
-            "label": "Percent",
-            "value": 37
-        },
-        {
-            "label": "Rest",
-            "value": 63
-        }
-    ]
-}`)
-
 export default function TableSlideover({ disclosure, stack, removeStackAtIndex }) {
     const { isOpen, onClose } = disclosure;
 
-    return isOpen && <>
-        <Box w="full" h="full" position="fixed" top={0} left={0} bg="rgba(0,0,0,0.3)" zIndex={100} onClick={onClose} />
-        <Box h="full" position="fixed" overflow={"scroll"} top={0} left={0} zIndex={101} p={4} margin>
+    return <>
+        {isOpen && <Box w="full" h="full" position="fixed" top={0} left={0} bg="rgba(0,0,0,0.3)" zIndex={100} onClick={onClose} />}
+        <Box h="full" transition={"all ease 0.1s"} transform={`translateX(${!isOpen ? -100 : 0}%)`} position="fixed" overflow={"scroll"} top={0} left={0} zIndex={101} p={4} margin>
             {stack.map((item, i) => {
                 switch (item.type) {
                     case "query":
@@ -198,7 +123,7 @@ function StatisticCard({ data, num, removeStackAtIndex }) {
         <CardBody>
             <Stat>
                 <StatLabel>{kebabCaseToTitleCase(data.label)}</StatLabel>
-                <StatNumber>{data.value}</StatNumber>
+                <StatNumber>{!isNaN(data.value) ? Math.round(parseFloat(data.value) * 100) / 100 : data.value}</StatNumber>
             </Stat>
         </CardBody>
     </Card>

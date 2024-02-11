@@ -1,1 +1,1 @@
-export const baseUrl = 'http://localhost:3000';
+export const baseUrl = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
