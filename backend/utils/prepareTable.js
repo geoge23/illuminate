@@ -32,16 +32,33 @@ export default function prepareTable(rows) {
                     ]
                 }
             } else {
-                return {
-                    type: "statistic",
-                    data: {
-                        label: titleOfRow,
-                        value: row[titleOfRow]
+                if (Object.keys(row[titleOfRow]) == 0) {
+                    return {
+                        type: "statistic",
+                        data: {
+                            label: titleOfRow,
+                            value: row[titleOfRow]
+                        }
+                    }
+                } else {
+                    return {
+                        type: "table",
+                        data: Object.entries(row[titleOfRow]).map(([key, value]) => {
+                            return {
+                                label: key,
+                                value: value
+                            }
+                        }
+                        )
                     }
                 }
             }
+        } else {
+            return {
+                type: "table",
+                data: rows
+            }
         }
-
     } else {
         const numberOfColumns = Object.keys(row).length;
         if (numberOfColumns === 2 && rows.length < 25) {
