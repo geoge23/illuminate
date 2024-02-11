@@ -55,7 +55,7 @@ export default function Main() {
                 <Text mt={5} fontSize="lg" fontWeight="bold" textTransform={"uppercase"}>or try one of ours</Text>
                 <Link to="/table/one"><Text fontSize="lg" textDecoration={"underline"}>Mock Patient Re-entry Data</Text></Link>
                 <Link to="/table/two"><Text fontSize="lg" textDecoration={"underline"}>Breast Cancer Statistics</Text></Link>
-                <Link to="/table/three"><Text fontSize="lg" textDecoration={"underline"}>Childhood Obesity by State</Text></Link>
+                <Link to="/table/three"><Text fontSize="lg" textDecoration={"underline"}>Example Organizational List</Text></Link>
             </Flex>
         </Flex>
     );
