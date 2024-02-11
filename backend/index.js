@@ -44,7 +44,7 @@ app.post('/api/table/upload', async (req, res) => {
     });
 
     const cols = Object.keys(data[0]).filter(col => col !== "id");
-    const escapeCol = (col) => pg.escapeIdentifier(col.toLowerCase().replace(/ /g, '_'));
+    const escapeCol = (col) => pg.escapeIdentifier(col.toLowerCase().trim().replace(/ /g, '_'));
     const schema = cols.map((col) => {
         return `${escapeCol(col)} ${getPgType(data.find(row => valueOrBlank(row[col]) !== null)?.[col])}`;
     })

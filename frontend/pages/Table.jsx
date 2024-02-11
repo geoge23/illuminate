@@ -46,13 +46,19 @@ export default function TablePage() {
 
     async function makeQuery(query) {
         setLoading(true)
-        const queryRes = await fetch(`${baseUrl}/api/table/${id}/query`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query }),
-        })
+        let queryRes;
+        try {
+            queryRes = await fetch(`${baseUrl}/api/table/${id}/query`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query }),
+            })
+        } catch (e) {
+            setLoading(false)
+            alert("Sorry, I didn't understand. Can you try rephrasing that?");
+        }
 
         const json = await queryRes.json();
         setLoading(false)
