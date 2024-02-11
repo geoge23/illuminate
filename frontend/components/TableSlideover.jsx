@@ -4,9 +4,16 @@ import { Box, Card, CardBody, Stat, StatLabel, StatNumber, Text } from "@chakra-
 import { Bar, Pie } from "react-chartjs-2";
 import 'chart.js/auto';
 import formatValue, { kebabCaseToTitleCase } from "../formatValue";
+import { useEffect } from 'react';
 
 export default function TableSlideover({ disclosure, stack, removeStackAtIndex }) {
     const { isOpen, onClose } = disclosure;
+
+    useEffect(() => {
+        if (stack.length == 0) [
+            onClose()
+        ]
+    }, [stack])
 
     return <>
         {isOpen && <Box w="full" h="full" position="fixed" top={0} left={0} bg="rgba(0,0,0,0.3)" zIndex={100} onClick={onClose} />}

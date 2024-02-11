@@ -10,4 +10,5 @@ RUN cd backend && npm install
 
 EXPOSE 3000
 
-CMD ["node", "backend/index.js"]
+WORKDIR /usr/src/app/backend
+CMD ["node", "index.js"]

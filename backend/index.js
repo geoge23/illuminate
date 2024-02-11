@@ -20,7 +20,7 @@ app.use(session({
     resave: true,
     cookie: { secure: true }
 }))
-app.use(bodyParser.raw({ type: 'text/csv' }));
+app.use(bodyParser.raw({ type: 'text/csv', limit: '5mb' }));
 app.use(bodyParser.json());
 
 app.use(cors())

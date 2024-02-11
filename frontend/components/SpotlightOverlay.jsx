@@ -37,7 +37,7 @@ export default function SpotlightOverlay({ disclosure, makeQuery }) {
                     <IconButton onClick={submitQuery} colorScheme="blue" fontSize={"3xl"} aspectRatio={"1/1"} h="80px" ml="2" textTransform={"uppercase"} icon={<ArrowForwardIcon />}></IconButton>
                 </Flex>
                 <Flex flexDir={"column"} color={"white"}>
-                    <Text mt={5} fontSize="lg" fontWeight="bold" textTransform={"uppercase"}>or try one of ours</Text>
+                    <Text mt={5} fontSize="lg" fontWeight="bold" textTransform={"uppercase"}>some examples</Text>
                     <Text fontSize={"lg"}>
                         How many patients have each type of disease?<br />
                         Of the patients with heart disease, how many re-entered the hospital after leaving?<br />
