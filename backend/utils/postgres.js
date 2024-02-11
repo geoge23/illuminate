@@ -56,7 +56,7 @@ export async function guessEnums(tableName) {
 
 const jsToPgType = {
     string: 'text',
-    number: 'int',
+    number: 'float',
     boolean: 'bool',
     object: 'jsonb',
 }
@@ -66,6 +66,7 @@ export function getPgType(val) {
     if (val === null || val === undefined) {
         return 'text';
     }
+
     // check if is a date
     if (val instanceof Date) {
         return 'timestamp';

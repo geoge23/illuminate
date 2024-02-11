@@ -24,17 +24,25 @@ export default function Main() {
                 //read the csv file and send to /table/upload
                 const file = e.target.files[0];
                 const reader = new FileReader();
+                let json;
                 reader.onload = async (e) => {
                     setLoading(true);
-                    const res = await fetch(`${baseUrl}/table/upload`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'text/csv',
-                        },
-                        body: e.target.result,
-                    });
+                    try {
+                        const res = await fetch(`${baseUrl}/table/upload`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/csv',
+                            },
+                            body: e.target.result,
+                        });
 
-                    const json = await res.json();
+                        json = await res.json();
+                    } catch (e) {
+                        setLoading(false);
+                        alert(e.message);
+                        console.log(e);
+                        return;
+                    }
                     const table = json.table;
                     navigate(`/table/${table}`);
                 }
@@ -45,10 +53,9 @@ export default function Main() {
             }}>upload a dataset</Button>
             <Flex flexDir={"column"}>
                 <Text mt={5} fontSize="lg" fontWeight="bold" textTransform={"uppercase"}>or try one of ours</Text>
-                <Link to="/about"><Text fontSize="lg" textDecoration={"underline"}>Mock Patient Re-entry Data</Text></Link>
-                <Link to="/about"><Text fontSize="lg" textDecoration={"underline"}>Users in a Company with Demographics</Text></Link>
-                <Link to="/about"><Text fontSize="lg" textDecoration={"underline"}>Childhood Obesity by State</Text></Link>
-                <Link to="/about"><Text fontSize="lg" textDecoration={"underline"}>Example Number Four</Text></Link>
+                <Link to="/table/one"><Text fontSize="lg" textDecoration={"underline"}>Mock Patient Re-entry Data</Text></Link>
+                <Link to="/table/two"><Text fontSize="lg" textDecoration={"underline"}>Breast Cancer Statistics</Text></Link>
+                <Link to="/table/three"><Text fontSize="lg" textDecoration={"underline"}>Childhood Obesity by State</Text></Link>
             </Flex>
         </Flex>
     );

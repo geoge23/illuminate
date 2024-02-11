@@ -42,14 +42,14 @@ app.post('/table/upload', async (req, res) => {
     });
 
     const cols = Object.keys(data[0]).filter(col => col !== "id");
-    const escapeCol = (col) => pg.escapeIdentifier(col.toLowerCase());
+    const escapeCol = (col) => pg.escapeIdentifier(col.toLowerCase().replace(/ /g, '_'));
     const schema = cols.map((col) => {
         return `${escapeCol(col)} ${getPgType(data.find(row => valueOrBlank(row[col]) !== null)?.[col])}`;
     })
     schema.push('id SERIAL PRIMARY KEY');
     const schemaText = schema.join(', ');
 
-    const tableName = `table_${Math.random().toString(36).substring(7)}`; //TODO: make this better
+    const tableName = req.headers.name ? req.headers.name : `table_${Math.random().toString(36).substring(7)}`; //TODO: make this better
     const escapedTableName = pg.escapeIdentifier(tableName);
     await client.query(`CREATE TABLE ${escapedTableName} (${schemaText})`); //TODO: this can def inject sql
 
