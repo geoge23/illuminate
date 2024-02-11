@@ -9,6 +9,9 @@ import client, { getPgType } from './utils/postgres.js';
 import prepareTable from './utils/prepareTable.js';
 import generateStructuredMessage from './utils/structuredMessage.js';
 import cors from 'cors';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 config();
 
@@ -24,10 +27,9 @@ app.use(bodyParser.raw({ type: 'text/csv', limit: '5mb' }));
 app.use(bodyParser.json());
 
 app.use(cors())
-
 app.use(express.static('public'));
 
-app.post('/table/upload', async (req, res) => {
+app.post('/api/table/upload', async (req, res) => {
     // takes a plaintext csv
     // returns a table id
 
@@ -71,7 +73,7 @@ function valueOrBlank(val) {
     return val === null || val === undefined || val === "" ? null : val;
 }
 
-app.get('/table/:id', async (req, res) => {
+app.get('/api/table/:id', async (req, res) => {
     const table = req.params.id;
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 100;
@@ -98,7 +100,7 @@ app.get('/table/:id', async (req, res) => {
     });
 })
 
-app.post('/table/:id/query', async (req, res) => {
+app.post('/api/table/:id/query', async (req, res) => {
     const { query } = req.body;
     const table = req.params.id;
 
@@ -152,6 +154,11 @@ app.post('/table/:id/query', async (req, res) => {
         gptQuery
     });
 })
+
+app.get('*', function (request, response) {
+    response.sendFile(resolve(__dirname, 'public', 'index.html'));
+});
+
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server is running on port ${process.env.PORT || 3000}`);

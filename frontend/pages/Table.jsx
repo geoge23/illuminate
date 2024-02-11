@@ -20,7 +20,7 @@ export default function TablePage() {
 
     useEffect(() => {
         setLoading(true)
-        fetch(`${baseUrl}/table/${id}`)
+        fetch(`${baseUrl}/api/table/${id}`)
             .then(response => response.json())
             .then(json => {
                 setLoading(false)
@@ -46,7 +46,7 @@ export default function TablePage() {
 
     async function makeQuery(query) {
         setLoading(true)
-        const queryRes = await fetch(`${baseUrl}/table/${id}/query`, {
+        const queryRes = await fetch(`${baseUrl}/api/table/${id}/query`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export default function TablePage() {
 
     async function loadMore() {
         setLoading(true)
-        fetch(`${baseUrl}/table/${id}?offset=${response.rows.length}`, {
+        fetch(`${baseUrl}/api/table/${id}?offset=${response.rows.length}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,9 +91,9 @@ export default function TablePage() {
             {loading && <Loader />}
             <SpotlightOverlay disclosure={spotlightDisclosure} makeQuery={makeQuery} />
             <TableSlideover disclosure={sidebarDisclosure} stack={stack} removeStackAtIndex={removeStackAtIndex} />
-            <Flex justifyContent={"space-between"} mb={4}>
-                <Flex alignItems="center">
-                    <Image src={Logo} alt="logo" aspectRatio="1x1" h={16} cursor={"pointer"} onClick={() => navigate("/")} />
+            <Flex justifyContent={"space-between"} mb={4} position={"static"} top={0} right={0}>
+                <Flex alignItems="center" onClick={() => navigate("/")} cursor={"pointer"}>
+                    <Image src={Logo} alt="logo" aspectRatio="1x1" h={16} />
                     <Flex flexDir="column" ml="3">
                         <Text fontSize="4xl" fontWeight="bold" color="blue.500" mb={-1} mt={-2} textTransform={"uppercase"}>Illuminate</Text>
                         <Text fontSize="sm" fontWeight="thin" mt={-2}>Now viewing your dataset</Text>
@@ -107,6 +107,7 @@ export default function TablePage() {
             <table style={{
                 width: "100%",
                 borderCollapse: "collapse",
+                overflowY: "scroll"
             }}>
                 <thead>
                     <tr style={{

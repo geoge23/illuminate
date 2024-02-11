@@ -15,7 +15,7 @@ export default function Main() {
             {loading && <Loader />}
             <Flex alignItems="center">
                 <Image src={Logo} alt="logo" aspectRatio="1x1" h="100px" />
-                <Flex flexDir="column" ml="7">
+                <Flex flexDir="column" ml="5">
                     <Text fontSize="xl" fontWeight="bold" mb={-6}>Welcome to</Text>
                     <Text fontSize="6xl" fontWeight="bold" color="blue.500" mb={-2}>Illuminate</Text>
                 </Flex>
@@ -28,7 +28,7 @@ export default function Main() {
                 reader.onload = async (e) => {
                     setLoading(true);
                     try {
-                        const res = await fetch(`${baseUrl}/table/upload`, {
+                        const res = await fetch(`${baseUrl}/api/table/upload`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'text/csv',
