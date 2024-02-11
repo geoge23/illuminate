@@ -15,7 +15,7 @@ export default function Main() {
             {loading && <Loader />}
             <Flex alignItems="center">
                 <Image src={Logo} alt="logo" aspectRatio="1x1" h="100px" />
-                <Flex flexDir="column" ml="5">
+                <Flex flexDir="column" ml="1">
                     <Text fontSize="xl" fontWeight="bold" mb={-6}>Welcome to</Text>
                     <Text fontSize="6xl" fontWeight="bold" color="blue.500" mb={-2}>Illuminate</Text>
                 </Flex>
@@ -51,6 +51,7 @@ export default function Main() {
             <Button mt={5} colorScheme="blue" size="lg" textTransform={"uppercase"} leftIcon={<PlusSquareIcon />} onClick={() => {
                 document.getElementById('file').click();
             }}>upload a dataset</Button>
+            <Text fontSize="xs" mt={2} fontWeight="light" color={"gray.400"} fontFamily={"monospace"}>Upload a .csv file to use your data</Text>
             <Flex flexDir={"column"}>
                 <Text mt={5} fontSize="lg" fontWeight="bold" textTransform={"uppercase"}>or try one of ours</Text>
                 <Link to="/table/one"><Text fontSize="lg" textDecoration={"underline"}>Mock Patient Re-entry Data</Text></Link>

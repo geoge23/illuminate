@@ -94,8 +94,8 @@ export default function TablePage() {
             <Flex justifyContent={"space-between"} mb={4} position={"static"} top={0} right={0}>
                 <Flex alignItems="center" onClick={() => navigate("/")} cursor={"pointer"}>
                     <Image src={Logo} alt="logo" aspectRatio="1x1" h={16} />
-                    <Flex flexDir="column" ml="3">
-                        <Text fontSize="4xl" fontWeight="bold" color="blue.500" mb={-1} mt={-2} textTransform={"uppercase"}>Illuminate</Text>
+                    <Flex flexDir="column" ml="1">
+                        <Text fontSize="4xl" fontWeight="bold" color="blue.500" mb={-1} mt={-2}>Illuminate</Text>
                         <Text fontSize="sm" fontWeight="thin" mt={-2}>Now viewing your dataset</Text>
                     </Flex>
                 </Flex>
